@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Metric {
+  Score
+  Top
+}
+
+enum QuizGameState {
+  NotStarted
+  Started
+  Ended
+}
+
+model QuizGame {
+  gameOfEventId     String        @id
+  startTime         DateTime      @default(now())
+  secondPerQuestion Int
+  questionIndex     Int
+  state             QuizGameState
+
+  UserQuiz      UserQuiz[]
+  Question      Question[]
+  QuizThreshold QuizThreshold[]
+}
+
+model QuizThreshold {
+  id            String @id @default(uuid())
+  gameOfEventId String
+  threshold     Int
+  metric        Metric
+
+  QuizGame QuizGame @relation(fields: [gameOfEventId], references: [gameOfEventId], onDelete: Cascade)
+
+  Prize Prize[]
+}
+
+model Prize {
+  quizThresholdId String
+  promotionId     String
+  amount          Int
+
+  QuizThreshold QuizThreshold @relation(fields: [quizThresholdId], references: [id], onDelete: Cascade)
+
+  @@id([quizThresholdId, promotionId])
+}
+
+model Question {
+  id            String @id @default(uuid())
+  gameOfEventId String
+  content       String
+
+  Option Option[]
+
+  QuizGame QuizGame @relation(fields: [gameOfEventId], references: [gameOfEventId], onDelete: Cascade)
+}
+
+model Option {
+  choice     String
+  questionId String
+  content    String
+  isCorrect  Boolean
+
+  Question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  User_Choose_Option User_Choose_Option[]
+
+  @@id([questionId, choice])
+}
+
+model UserQuiz {
+  id            String @id @default(uuid())
+  userId        String
+  gameOfEventId String
+
+  User_Choose_Option User_Choose_Option[]
+
+  QuizGame   QuizGame     @relation(fields: [gameOfEventId], references: [gameOfEventId], onDelete: Cascade)
+  UserResult UserResult[]
+
+  @@unique([userId, gameOfEventId])
+}
+
+model UserResult {
+  id         String @id @default(uuid())
+  userQuizId String
+  score      Int
+  top        Int
+
+  UserQuiz UserQuiz @relation(fields: [userQuizId], references: [id], onDelete: Cascade)
+}
+
+model User_Choose_Option {
+  questionId   String
+  choice       String
+  userQuizId   String
+  timeAnswered Int    @default(1)
+
+  UserQuiz UserQuiz @relation(fields: [userQuizId], references: [id], onDelete: Cascade)
+  Option   Option   @relation(fields: [questionId, choice], references: [questionId, choice], onDelete: Cascade)
+
+  @@id([questionId, choice, userQuizId])
+}
+
+model JobSchedule {
+  id            String   @id @default(uuid())
+  executionDate DateTime
+  startedDate   DateTime
+}
