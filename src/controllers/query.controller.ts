@@ -3,15 +3,14 @@ import { QuizGameInfoParam } from "src/infra/readers/quiz-game-info/quiz-game-in
 import { QuizGameInfoPresenter } from "src/infra/readers/quiz-game-info/quiz-game-info.presenter";
 import { QuizGameInfoReader } from "src/infra/readers/quiz-game-info/quiz-game-info.reader";
 
-@Controller('')
+@Controller()
 export class QueryController {
     constructor(
         private readonly quizGameInfoReader: QuizGameInfoReader
     ) { }
 
-    @Get('quiz-game-info')
+    @Get('/unauth/quiz-game-info')
     async getQuizGameInfo(@Query() param: QuizGameInfoParam): Promise<QuizGameInfoPresenter> {
         return await this.quizGameInfoReader.read(param);
     }
-
 }

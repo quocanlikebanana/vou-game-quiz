@@ -1,7 +1,7 @@
 import { ValueObject } from "src/common/domain/value-object.i";
 
 export interface PrizeProps {
-    promotionId: string;
+    promotionId: number;
     amount: number;
 }
 

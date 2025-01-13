@@ -17,17 +17,17 @@ export class QuizGameController {
         private readonly domainEventDispatcher: DomainEventDispatcher
     ) { }
 
-    @Post('create')
+    @Post('/partner/create')
     async createQuiz(@Body() createQuizParam: CreateQuizParam): Promise<void> {
         return await this.createQuizCommand.execute(createQuizParam);
     }
 
-    @Post('delete')
+    @Post('/partner/delete')
     async deleteQuiz(@Body() deleteQuizParam: { gameOfEventId: string }): Promise<void> {
         return await this.deleteQuizCommand.execute(deleteQuizParam);
     }
 
-    @Post('start')
+    @Post('/partner/start')
     async startQuiz(@Body() startQuizParam: { gameOfEventId: string }): Promise<void> {
         try {
             return await this.startQuizCommand.execute(startQuizParam);
