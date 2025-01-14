@@ -99,7 +99,17 @@ model UserResult {
   score      Int
   top        Int
 
-  UserQuiz UserQuiz @relation(fields: [userQuizId], references: [id], onDelete: Cascade)
+  UserQuiz         UserQuiz           @relation(fields: [userQuizId], references: [id], onDelete: Cascade)
+  UserResult_Prize UserResult_Prize[]
+}
+
+model UserResult_Prize {
+  id           String @id @default(uuid())
+  userResultId String
+  promotionId  String
+  amount       Int
+
+  UserResult UserResult @relation(fields: [userResultId], references: [id], onDelete: Cascade)
 }
 
 model User_Choose_Option {

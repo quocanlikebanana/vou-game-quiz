@@ -25,6 +25,9 @@ import { QuizGameStartedDomainEvent } from './domain/quiz-game/domain-events/qui
 import { QuizGateway } from './socket/quiz.gateway';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EvaluateUserAnswerReader } from './infra/readers/evaluate-user-answer/evaluate-user-answer.reader';
+import { HttpModule } from '@nestjs/axios';
+import { StatsModule } from './stats/stats.module';
+import { IQuizGameRepository } from './domain/quiz-game/quiz-game.repo.i';
 
 @Module({
   imports: [
@@ -33,6 +36,8 @@ import { EvaluateUserAnswerReader } from './infra/readers/evaluate-user-answer/e
     }),
     EventEmitterModule.forRoot(),
     InfraModule,
+    HttpModule,
+    StatsModule,
   ],
   providers: [
     // Handlers
