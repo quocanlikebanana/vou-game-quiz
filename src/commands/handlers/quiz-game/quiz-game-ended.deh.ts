@@ -65,10 +65,18 @@ export class QuizGameEndedDomainEventHandler implements IDomainEventHandler<Quiz
             });
         });
 
-        await this.prismaService.userResult.createMany({
-            data: userResults.map(userResult => ({
-                ...userResult
-            }))
+        const userResultEntities = userResults.map(async (userResult) => {
+            return await this.prismaService.userResult.create({
+                data: {
+                    score: userResult.score,
+                    top: userResult.top,
+                    UserQuiz: {
+                        connect: {
+                            id: userResult.userQuizId
+                        }
+                    }
+                }
+            });
         });
 
         this.eventEmitter.emit("quiz-game.ended", event);
@@ -82,7 +90,7 @@ export class QuizGameEndedDomainEventHandler implements IDomainEventHandler<Quiz
                     data: {
                         UserResult: {
                             connect: {
-                                id: userResult.userQuizId
+                                userQuizId: userResult.userQuizId
                             }
                         },
                         promotionId: prize.props.promotionId,

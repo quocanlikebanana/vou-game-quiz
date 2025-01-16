@@ -104,11 +104,17 @@ export class QuizGameAggregate extends AggregateRoot<QuizGameProps> {
             if (metric === Metric.SCORE) {
                 const filteredThreshold = metricThreshold.filter(quizThreshold => quizThreshold.props.threshold <= threshold);
                 const maxThreshold = filteredThreshold.reduce((max, quizThreshold) => quizThreshold.props.threshold > max.props.threshold ? quizThreshold : max, filteredThreshold[0]);
+                if (!maxThreshold) {
+                    return [];
+                }
                 return maxThreshold.props.prizes;
             }
             if (metric === Metric.TOP) {
                 const filteredThreshold = metricThreshold.filter(quizThreshold => quizThreshold.props.threshold >= threshold);
                 const minThreshold = filteredThreshold.reduce((min, quizThreshold) => quizThreshold.props.threshold < min.props.threshold ? quizThreshold : min, filteredThreshold[0]);
+                if (!minThreshold) {
+                    return [];
+                }
                 return minThreshold.props.prizes;
             }
         }

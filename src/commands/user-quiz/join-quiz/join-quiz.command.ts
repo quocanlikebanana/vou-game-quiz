@@ -25,15 +25,23 @@ export class JoinQuizCommand implements ICommand<JoinQuizParam, { userQuizId: st
             throw new DomainError('Is not connected to event');
         }
         try {
-            const body = { userId, gameOfEventId, turn: 1 };
-            const endpoint = `${eventUrl}/system/reduce-turn`;
-            console.log(`Send request: `, endpoint, body);
-            await this.httpService.axiosRef.post(endpoint, body);
+            const gameUrl = process.env.GAME_URL;
+            if (!gameUrl) {
+                throw new DomainError('Is not set game url');
+            }
+            const gameEndpoint = `${gameUrl}/game-event/unauth/detail/${gameOfEventId}`;
+            const gameInfo = await this.httpService.axiosRef.get(gameEndpoint);
+            if (!gameInfo.data || gameInfo.data.eventId == null) {
+                throw new DomainError('Game not found');
+            }
+            const eventId = gameInfo.data.eventId;
+            const body = { userId, eventId, turn: 1 };
+            const eventEndpoint = `${eventUrl}/system/reduce-turn`;
+            console.log(`Send request: `, eventEndpoint, body);
+            await this.httpService.axiosRef.post(eventEndpoint, body);
         } catch (error) {
             if (error instanceof AxiosError) {
-                if (error.status === 400) {
-                    throw new DomainError(error.message);
-                }
+                throw new DomainError(error.message);
             }
         }
 

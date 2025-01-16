@@ -53,24 +53,47 @@ export class UserQuizRepository extends IUserQuizRepository {
     }
 
     async addChoosenOption(userQuiz: UserQuizAggregate, choosenOption: UserChooseOptionValueObject): Promise<void> {
-        await this.prismaService.user_Choose_Option.create({
-            data: {
-                UserQuiz: {
-                    connect: {
-                        id: userQuiz.id
-                    }
-                },
-                Option: {
-                    connect: {
-                        questionId_choice: {
-                            choice: choosenOption.props.choice,
-                            questionId: choosenOption.props.questionId,
-                        }
-                    }
-                },
-                timeAnswered: choosenOption.props.timeAnswered
+        const userChooseOption = await this.prismaService.user_Choose_Option.findFirst({
+            where: {
+                choice: choosenOption.props.choice,
+                questionId: choosenOption.props.questionId,
+                userQuizId: userQuiz.id
             }
         });
+        if (userChooseOption != null) {
+            await this.prismaService.user_Choose_Option.update({
+                where: {
+                    questionId_choice_userQuizId: {
+                        choice: choosenOption.props.choice,
+                        questionId: choosenOption.props.questionId,
+                        userQuizId: userQuiz.id
+                    }
+                },
+                data: {
+                    choice: choosenOption.props.choice,
+                    timeAnswered: choosenOption.props.timeAnswered
+                }
+            });
+        } else {
+            await this.prismaService.user_Choose_Option.create({
+                data: {
+                    UserQuiz: {
+                        connect: {
+                            id: userQuiz.id
+                        }
+                    },
+                    Option: {
+                        connect: {
+                            questionId_choice: {
+                                choice: choosenOption.props.choice,
+                                questionId: choosenOption.props.questionId,
+                            }
+                        }
+                    },
+                    timeAnswered: choosenOption.props.timeAnswered
+                }
+            });
+        }
     }
 
     protected async _save(agg: AggregateRoot<UserQuizProps>): Promise<void> {

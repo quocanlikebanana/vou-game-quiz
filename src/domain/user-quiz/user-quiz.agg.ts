@@ -23,9 +23,11 @@ export class UserQuizAggregate extends AggregateRoot<UserQuizProps> {
     }
 
     public addOptionChoosen(option: UserChooseOptionValueObject): void {
-        if (this.props.userChooseOptions.find(co => co.props.questionId === option.props.questionId) != null) {
-            throw new DomainError('Question already answered');
+        const index = this.props.userChooseOptions.findIndex(co => co.props.questionId === option.props.questionId);
+        if (index !== -1) {
+            this.props.userChooseOptions[index] = option;
+        } else {
+            this.props.userChooseOptions.push(option);
         }
-        this.props.userChooseOptions.push(option);
     }
 }

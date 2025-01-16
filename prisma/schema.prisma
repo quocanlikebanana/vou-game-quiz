@@ -95,7 +95,7 @@ model UserQuiz {
 
 model UserResult {
   id         String @id @default(uuid())
-  userQuizId String
+  userQuizId String @unique
   score      Int
   top        Int
 

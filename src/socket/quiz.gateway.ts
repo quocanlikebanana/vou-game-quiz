@@ -46,26 +46,34 @@ export class QuizGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage('join')
     @UsePipes(new ValidationPipe({ transform: true }))
     async handleJoinQuiz(client: Socket, payload: JoinQuizParam): Promise<void> {
-        const userQuiz = await this.prismaService.userQuiz.findUnique({
-            where: {
-                userId_gameOfEventId: {
-                    userId: payload.userId,
-                    gameOfEventId: payload.gameOfEventId
+        try {
+            const userQuiz = await this.prismaService.userQuiz.findUnique({
+                where: {
+                    userId_gameOfEventId: {
+                        userId: payload.userId,
+                        gameOfEventId: payload.gameOfEventId
+                    }
                 }
+            });
+            if (userQuiz == null) {
+                await this.joinQuizCommand.execute(payload);
             }
-        });
-        if (userQuiz == null) {
-            await this.joinQuizCommand.execute(payload);
+            client.join(payload.gameOfEventId);
+            client.data.userId = payload.userId;
+            client.data.gameOfEventId = payload.gameOfEventId;
+            client.emit("user-joined", `User ${payload.userId} joined quiz with room: ${payload.gameOfEventId}`);
+        } catch (error) {
+            console.error(error);
         }
-        client.join(payload.gameOfEventId);
-        client.data.userId = payload.userId;
-        client.data.gameOfEventId = payload.gameOfEventId;
-        client.emit("user-joined", `User ${payload.userId} joined quiz with room: ${payload.gameOfEventId}`);
     }
 
     @SubscribeMessage('submit')
     async handleSubmitAnswer(client: Socket, payload: SubmitAnswerParam): Promise<void> {
-        await this.submittAnswerCommand.execute(payload);
+        try {
+            await this.submittAnswerCommand.execute(payload);
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     @SubscribeMessage('leave')
